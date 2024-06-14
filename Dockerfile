@@ -9,8 +9,11 @@ WORKDIR /rails
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development" \
+    BUNDLE_WITHOUT="development:test" \
     LANG=C.UTF-8
+
+# Create the rails user and group if they don't exist
+RUN groupadd -r rails || true && useradd -r -g rails rails || true
 
 # Throw-away build stage
 FROM base AS build
@@ -23,13 +26,16 @@ RUN apt-get update -qq && \
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
-RUN bundle config --global frozen 1 && \
-    bundle install --without development test && \
+RUN bundle config set --local deployment 'true' && \
+    bundle config set --local without 'development test' && \
+    bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
 # Copy application code
 COPY . .
+
+# Precompile assets
 
 # Precompile bootsnap code
 RUN bundle exec bootsnap precompile app/ lib/
@@ -43,13 +49,14 @@ RUN apt-get update -qq && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Create the rails user and group if they don't exist
+RUN groupadd -r rails || true && useradd -r -g rails rails || true
+
 # Copy built artifacts from the build stage
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build --chown=rails:rails /rails /rails
 
-# Set a non-root user
-RUN useradd rails --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
+# Switch to the rails user
 USER rails:rails
 
 # Add Rails bin directory to PATH
@@ -65,4 +72,4 @@ ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 EXPOSE 3000
 
 # Default command to start the Rails server
-CMD ["./bin/rails", "server"]
+CMD ["./bin/rails", "server", "-b", "0.0.0.0"]

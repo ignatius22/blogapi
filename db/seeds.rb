@@ -1,11 +1,11 @@
-# Seed Users
-# 5.times do |i|
-#   User.create!(
-#     email: "user#{i+1}@example.com",
-#     fullname: "User #{i+1}".ljust(8, 'x'),
-#     password: "password#{i+1}"
-#   )
-# end
+Seed Users
+5.times do |i|
+  User.create!(
+    email: "user#{i+1}@example.com",
+    fullname: "User #{i+1}".ljust(8, 'x'),
+    password: "password#{i+1}"
+  )
+end
 
 # Seed Posts
 5.times do |i|
