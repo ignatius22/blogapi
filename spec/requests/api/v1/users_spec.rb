@@ -9,7 +9,7 @@ RSpec.describe "Api::V1::Users", type: :request do
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
-      expect(json_response['email']).to eq(user.email)
+      expect(json_response['data']['attributes']['email']).to eq(user.email)
     end
   end
 
@@ -24,6 +24,8 @@ RSpec.describe "Api::V1::Users", type: :request do
         }.to change(User, :count).by(1)
 
         expect(response).to have_http_status(:created)
+        json_response = JSON.parse(response.body)
+        expect(json_response['data']['attributes']['email']).to eq('test@test.org')
       end
 
       it "does not create user with taken email" do
@@ -34,6 +36,8 @@ RSpec.describe "Api::V1::Users", type: :request do
         }.to_not change(User, :count)
 
         expect(response).to have_http_status(:unprocessable_entity)
+        json_response = JSON.parse(response.body)
+        expect(json_response['errors']).to be_present
       end
     end
   end
@@ -44,10 +48,13 @@ RSpec.describe "Api::V1::Users", type: :request do
     context "with valid params" do
       it "updates the user" do
         patch api_v1_user_url(user),
-              params: { user: { email: user.email } },
+              params: { user: { email: 'newemail@example.com' } },
               headers: { 'Authorization' => JsonWebToken.encode(user_id: user.id) },
               as: :json
+
         expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+        expect(json_response['data']['attributes']['email']).to eq('newemail@example.com')
       end
 
       it "should forbid update user" do
@@ -65,6 +72,8 @@ RSpec.describe "Api::V1::Users", type: :request do
               headers: { 'Authorization' => JsonWebToken.encode(user_id: user.id) },
               as: :json
         expect(response).to have_http_status(:unprocessable_entity)
+        json_response = JSON.parse(response.body)
+        expect(json_response['errors']).to be_present
       end
     end
   end

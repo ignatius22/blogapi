@@ -21,7 +21,6 @@ module Authenticable
 
   protected
 
-  # Checks if there's a current user and responds with forbidden status if not
   def check_login
     head :forbidden unless current_user
   end

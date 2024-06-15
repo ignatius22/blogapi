@@ -7,7 +7,8 @@ class ShowUserService < ApplicationService
   def call
     user = User.find_by(id: @user_id)
     if user
-      { success: true, user: user }
+      serialized_user = UserSerializer.new(user).serializable_hash
+      { success: true, user: serialized_user }
     else
       { success: false, errors: ["User not found"] }
     end

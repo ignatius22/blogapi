@@ -7,7 +7,8 @@ class CreateUserService < ApplicationService
   def call
     user = User.new(@user_params)
     if user.save
-      { success: true, user: user }
+      serialized_user = UserSerializer.new(user).serializable_hash
+      { success: true, user: serialized_user }
     else
       { success: false, errors: user.errors.full_messages }
     end

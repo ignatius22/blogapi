@@ -9,7 +9,8 @@ class UpdateUserService < ApplicationService
     user = User.find_by(id: @user_id)
     if user
       if user.update(@user_params)
-        { success: true, user: user }
+        serialized_user = UserSerializer.new(user).serializable_hash
+        { success: true, user: serialized_user }
       else
         { success: false, errors: user.errors.full_messages }
       end
