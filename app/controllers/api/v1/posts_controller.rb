@@ -14,12 +14,12 @@ class Api::V1::PostsController < ApplicationController
 
   def create
     result = CreatePostService.call(current_user, post_params)
-    handle_response(result, :created)
+    handle_response(result, :created, :post)
   end
 
   def update
     result = UpdatePostService.call(@post, post_params)
-    handle_response(result, :ok)
+    handle_response(result, :ok, :post)
   end
 
   def destroy

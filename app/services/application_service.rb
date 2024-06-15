@@ -1,26 +1,14 @@
 # app/services/application_service.rb
 class ApplicationService
-  def initialize
-    @result = { success: false, errors: [] }
+  def self.call(*args, &block)
+    new(*args, &block).call
   end
 
-  def self.call(*args)
-    new(*args).call
-  end
-
-  protected
-
-  attr_accessor :result
-
-  def success!(data = {})
-    result[:success] = true
-    result.merge!(data)
-    result
+  def success!(result)
+    OpenStruct.new(success?: true, **result)
   end
 
   def failure!(errors)
-    result[:success] = false
-    result[:errors] = Array(errors)
-    result
+    OpenStruct.new(success?: false, errors: errors)
   end
 end
