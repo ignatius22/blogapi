@@ -5,15 +5,15 @@ on:
     branches:
       - main
 
-env:
-  ECR_IMAGE: ${{ vars.ECR_IMAGE }}
-  AWS_DEFAULT_REGION: us-west-1  # Hardcoding the region for troubleshooting
-  ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
-  ECS_SERVICE: ${{ vars.ECS_SERVICE }}
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    env:
+      ECR_IMAGE: ${{ vars.ECR_IMAGE }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+      ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+      ECS_SERVICE: ${{ vars.ECS_SERVICE }}
 
     steps:
       - name: Checkout repository
@@ -38,12 +38,19 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-1  # Hardcoding the region for troubleshooting
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR
         run: |
           echo "Logging in to Amazon ECR..."
           aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com
+
+      - name: Print environment variables
+        run: |
+          echo "ECR_IMAGE: ${{ env.ECR_IMAGE }}"
+          echo "AWS_DEFAULT_REGION: ${{ env.AWS_DEFAULT_REGION }}"
+          echo "ECS_CLUSTER: ${{ env.ECS_CLUSTER }}"
+          echo "ECS_SERVICE: ${{ env.ECS_SERVICE }}"
 
       - name: Build and push Docker image
         run: |
@@ -51,7 +58,7 @@ jobs:
           docker buildx create --use
           docker buildx inspect --bootstrap
           echo "Building and pushing Docker image..."
-          docker buildx build --platform linux/arm64 -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/${{ env.ECR_IMAGE }}:latest --push .
+          docker buildx build --platform linux/arm64 -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/${{ env.ECR_IMAGE }} --push .
 
       - name: Deploy to ECS
         run: |
