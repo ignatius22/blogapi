@@ -9,7 +9,7 @@ class Api::V1::PostsController < ApplicationController
 
   def index
     posts = Post.all.map { |post| format_post_dates(post) }
-    render json: posts
+    render json: PostSerializer.new(posts).serializable_hash.to_json
   end
 
   def create

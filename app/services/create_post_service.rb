@@ -9,7 +9,8 @@ class CreatePostService < ApplicationService
   def call
     post = @user.posts.build(@post_params)
     if post.save
-      success!(post: post)
+      serialized_post = PostSerializer.new(post).serializable_hash
+      success!(post: serialized_post)
     else
       failure!(post.errors.full_messages)
     end
