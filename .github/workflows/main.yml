@@ -58,7 +58,7 @@ jobs:
           docker buildx create --use
           docker buildx inspect --bootstrap
           echo "Building and pushing Docker image..."
-          docker buildx build --platform linux/arm64 -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/${{ env.ECR_IMAGE }} --push .
+          docker buildx build --platform linux/arm64 -t ${{ env.ECR_IMAGE }} --push .
 
       - name: Deploy to ECS
         run: |
