@@ -6,8 +6,9 @@ class ShowUserService < ApplicationService
 
   def call
     user = User.find_by(id: @user_id)
+    options = { include: [:posts] }
     if user
-      serialized_user = UserSerializer.new(user).serializable_hash
+      serialized_user = UserSerializer.new(user, options).serializable_hash
       { success: true, user: serialized_user }
     else
       { success: false, errors: ["User not found"] }

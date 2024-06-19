@@ -4,8 +4,9 @@ class Api::V1::PostsController < ApplicationController
   before_action :check_login, only: %i[create update destroy]
 
   def show
-    options = { include: [:user] }
-    render json: PostSerializer.new(@post, options).serializable_hash
+    service = ShowPostService.new(params[:id])
+    result = service.call
+    handle_response(result, :ok, :post)
   end
 
   def index
@@ -42,13 +43,13 @@ class Api::V1::PostsController < ApplicationController
     @post = Post.find(params[:id])
   end
 
-  def handle_response(result, status, resource)
-    if result.success?
-      render json: PostSerializer.new(result.send(resource)).serialized_json, status: status
-    else
-      render json: { errors: result.errors }, status: :unprocessable_entity
-    end
-  end
+  # def handle_response(result, status, resource)
+  #   if result.success?
+  #     render json: PostSerializer.new(result.send(resource)).serialized_json, status: status
+  #   else
+  #     render json: { errors: result.errors }, status: :unprocessable_entity
+  #   end
+  # end
 
   def format_post_dates(post)
       formatted_post = post.as_json(except: [:created_at, :updated_at])

@@ -3,6 +3,8 @@ class UserSerializer
 
   attributes :id, :email, :fullname
 
+  has_many :posts
+
   # attribute :created_at do |object|
   #   object.created_at.strftime('%Y-%m-%d %H:%M:%S')
   # end
