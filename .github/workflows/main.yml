@@ -1,4 +1,4 @@
-name: Build and Deploy BackendApp to ECR Public
+name: Build and Deploy to ECR Public
 
 on:
   push:
@@ -23,12 +23,12 @@ jobs:
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
         shell: bash
 
-      - name: Set up Docker for arm64
+      - name: Set up Docker for amd64
         uses: docker/setup-qemu-action@v2
         with:
-          platforms: linux/arm64
+          platforms: linux/amd64
 
-      - name: Set up Docker
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Configure AWS credentials
@@ -45,8 +45,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          echo "Creating buildx builder..."
+          echo "Building and pushing Docker image..."
           docker buildx create --use
           docker buildx inspect --bootstrap
-          echo "Building and pushing Docker image..."
-          docker buildx build --platform linux/arm64 -t ${{ env.ECR_IMAGE }} --push .
+          docker buildx build --platform linux/amd64 -t ${{ env.ECR_IMAGE }} --push .
