@@ -12,3 +12,6 @@ class ApplicationService
     OpenStruct.new(success?: false, errors: errors)
   end
 end
+
+
+

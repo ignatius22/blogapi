@@ -6,9 +6,7 @@ class CreatePostService < ApplicationService
   end
 
   def call
-
     post = @user.posts.build(@post_params)
-    
     if post.save
       serialized_post = PostSerializer.new(post).serializable_hash
       { success: true, post: serialized_post }

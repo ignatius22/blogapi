@@ -49,3 +49,7 @@ jobs:
           docker buildx inspect --bootstrap
           echo "Building and pushing Docker image..."
           docker buildx build --platform linux/amd64 -t ${{ env.ECR_IMAGE }} --push .
+      - name: Deploy to ECS
+        run: |
+          echo "Updating ECS service..."
+          aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --force-new-deployment
