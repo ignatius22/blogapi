@@ -4,7 +4,8 @@ class Api::V1::PostsController < ApplicationController
   before_action :check_login, only: %i[create update destroy]
 
   def show
-    render json: PostSerializer.new(@post).serializable_hash
+    options = { include: [:user] }
+    render json: PostSerializer.new(@post, options).serializable_hash
   end
 
   def index
