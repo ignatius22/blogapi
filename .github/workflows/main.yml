@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ECR_IMAGE: ${{vars.ECR_IMAGE}}  # Correct public ECR image reference
+      ECR_IMAGE: ${{ vars.ECR_IMAGE }}  # Correct public ECR image reference
       AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-      ECS_CLUSTER: ${{vars.ECS_CLUSTER}}
-      ECS_SERVICE: ${{vars.ECS_SERVICE}}
+      ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+      ECS_SERVICE: ${{ vars.ECS_SERVICE }}
 
     steps:
       - name: Checkout repository
@@ -38,20 +38,29 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR Public
         run: |
           echo "Logging in to Amazon ECR Public..."
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+
       - name: Build and push Docker image
         run: |
           echo "Creating buildx builder..."
           docker buildx create --use
           docker buildx inspect --bootstrap
           echo "Building and pushing Docker image..."
-          docker buildx build --platform linux/amd64 -t ${{ env.ECR_IMAGE }} --push .
+          docker buildx build --platform linux/amd64 -t ${{ vars.ECR_IMAGE }} --push .
+
+      - name: Debug - List ECS clusters and services
+        run: |
+          echo "Listing ECS clusters..."
+          aws ecs list-clusters
+          echo "Listing ECS services in cluster ${ECS_CLUSTER}..."
+          aws ecs list-services --cluster "${ECS_CLUSTER}"
+
       - name: Deploy to ECS
         run: |
           echo "Updating ECS service..."
-          aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --force-new-deployment
+          aws ecs update-service --cluster "${ECS_CLUSTER}" --service "${ECS_SERVICE}" --force-new-deployment
