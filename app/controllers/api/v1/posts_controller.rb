@@ -16,6 +16,7 @@ class Api::V1::PostsController < ApplicationController
 
   def create
     result = CreatePostService.call(current_user, post_params)
+    Rails.logger.debug { "CreatePostService result: #{result.inspect}" }
     handle_response(result, :created, :post)
   end
 
@@ -42,14 +43,6 @@ class Api::V1::PostsController < ApplicationController
   def set_post
     @post = Post.find(params[:id])
   end
-
-  # def handle_response(result, status, resource)
-  #   if result.success?
-  #     render json: PostSerializer.new(result.send(resource)).serialized_json, status: status
-  #   else
-  #     render json: { errors: result.errors }, status: :unprocessable_entity
-  #   end
-  # end
 
   def format_post_dates(post)
       formatted_post = post.as_json(except: [:created_at, :updated_at])

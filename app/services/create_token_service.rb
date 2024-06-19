@@ -8,7 +8,7 @@ class CreateTokenService < ApplicationService
   def call
     if @user&.authenticate(@password)
       token = JsonWebToken.encode(user_id: @user.id)
-      { success: true, token: token, user: @user }
+      { success: true, token: token, email: @user.email }
     else
       { success: false, errors: ["Unauthorized"] }
     end
