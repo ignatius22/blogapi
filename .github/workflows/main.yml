@@ -12,7 +12,7 @@ jobs:
     env:
       ECR_IMAGE: ${{ vars.ECR_IMAGE }}  # Correct public ECR image reference
       AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-      ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+      ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}  # This should be just the cluster name
       ECS_SERVICE: ${{ vars.ECS_SERVICE }}
 
     steps:
@@ -38,7 +38,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_DEFAULT_REGION }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR Public
         run: |
@@ -51,7 +51,7 @@ jobs:
           docker buildx create --use
           docker buildx inspect --bootstrap
           echo "Building and pushing Docker image..."
-          docker buildx build --platform linux/amd64 -t ${{ vars.ECR_IMAGE }} --push .
+          docker buildx build --platform linux/amd64 -t ${{ env.ECR_IMAGE }} --push .
 
       - name: Debug - List ECS clusters and services
         run: |
