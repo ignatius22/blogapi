@@ -4,12 +4,12 @@ class Api::V1::PostsController < ApplicationController
   before_action :check_login, only: %i[create update destroy]
 
   def show
-    render json: format_post_dates(@post)
+    render json: PostSerializer.new(@post).serializable_hash
   end
 
   def index
-    posts = Post.all.map { |post| format_post_dates(post) }
-    render json: PostSerializer.new(posts).serializable_hash.to_json
+    posts = Post.all
+    render json: PostSerializer.new(posts).serializable_hash
   end
 
   def create
@@ -41,10 +41,18 @@ class Api::V1::PostsController < ApplicationController
     @post = Post.find(params[:id])
   end
 
+  def handle_response(result, status, resource)
+    if result.success?
+      render json: PostSerializer.new(result.send(resource)).serialized_json, status: status
+    else
+      render json: { errors: result.errors }, status: :unprocessable_entity
+    end
+  end
+
   def format_post_dates(post)
-    formatted_post = post.as_json(except: [:created_at, :updated_at])
-    formatted_post['created_at'] = post.created_at.strftime('%Y-%m-%d %H:%M:%S')
-    formatted_post['updated_at'] = post.updated_at.strftime('%Y-%m-%d %H:%M:%S')
-    formatted_post
+      formatted_post = post.as_json(except: [:created_at, :updated_at])
+      formatted_post['created_at'] = post.created_at.strftime('%Y-%m-%d %H:%M:%S')
+      formatted_post['updated_at'] = post.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+      formatted_post
   end
 end
