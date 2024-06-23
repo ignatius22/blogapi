@@ -1,4 +1,6 @@
 class Api::V1::PostsController < ApplicationController
+  include Paginable
+
   before_action :set_post, only: %i[update destroy show]
   before_action :check_owner, only: %i[update destroy]
   before_action :check_login, only: %i[create update destroy]
@@ -10,8 +12,8 @@ class Api::V1::PostsController < ApplicationController
   end
 
   def index
-    posts = Post.all
-    render json: PostSerializer.new(posts).serializable_hash
+    @posts = Post.search(params).page(current_page).per(per_page)
+    render json: PostSerializer.new(@posts, links: pagination_meta(@posts)).serializable_hash
   end
 
   def create
@@ -49,5 +51,15 @@ class Api::V1::PostsController < ApplicationController
       formatted_post['created_at'] = post.created_at.strftime('%Y-%m-%d %H:%M:%S')
       formatted_post['updated_at'] = post.updated_at.strftime('%Y-%m-%d %H:%M:%S')
       formatted_post
+  end
+
+    def pagination_meta(collection)
+    {
+      current_page: collection.current_page,
+      next_page: collection.next_page,
+      prev_page: collection.prev_page,
+      total_pages: collection.total_pages,
+      total_count: collection.total_count
+    }
   end
 end

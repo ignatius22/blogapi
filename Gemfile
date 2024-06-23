@@ -52,3 +52,5 @@ end
 gem "jwt", "~> 2.8"
 
 gem "jsonapi-serializer", "~> 2.2"
+
+gem "kaminari", "~> 1.2"
