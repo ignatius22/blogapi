@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  mount Rswag::Ui::Engine => '/'
-  mount Rswag::Api::Engine => '/'
+  # mount Rswag::Ui::Engine => '/'
+  # mount Rswag::Api::Engine => '/'
   namespace :api do
     namespace :v1 do
       get 'tokens/create'

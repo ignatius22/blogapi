@@ -43,6 +43,8 @@ group :development, :test do
   gem 'faker'
   gem "rswag-specs"
   gem 'rswag'
+  gem 'rswag-api'  # Add this line
+  gem 'rswag-ui'   # Add this line if not already included
 end
 
 group :development do
